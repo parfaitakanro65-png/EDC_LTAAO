@@ -1,0 +1,1318 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EDC LTAO 2026 — État de Droit Constaté | Lycée Technique Agricole d'Adja-Ouèrè</title>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+<style>
+  :root {
+    --primary: #1b5e20;
+    --primary-light: #2e7d32;
+    --primary-dark: #0d3b12;
+    --accent: #f57c00;
+    --accent-light: #fff3e0;
+    --bg: #f4f7f5;
+    --card: #ffffff;
+    --text: #1e293b;
+    --muted: #64748b;
+    --border: #dce5df;
+    --success: #15803d;
+    --success-bg: #dcfce7;
+    --danger: #b91c1c;
+    --danger-bg: #fee2e2;
+    --warning: #b45309;
+    --warning-bg: #fef3c7;
+    --info: #0369a1;
+    --info-bg: #e0f2fe;
+    --shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+    --radius: 12px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* LOGIN OVERLAY */
+  #loginScreen {
+    position: fixed; inset: 0; z-index: 9999;
+    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 55%, #2e7d32 100%);
+    display: flex; align-items: center; justify-content: center; padding: 16px;
+  }
+  .login-box {
+    background: #fff; border-radius: 16px; padding: 32px 28px; width: 100%; max-width: 420px;
+    box-shadow: 0 20px 45px rgba(0,0,0,0.28); text-align: center;
+  }
+  .login-badge {
+    display: inline-block; background: var(--success-bg); color: var(--primary);
+    font-weight: 700; font-size: 12px; padding: 4px 12px; border-radius: 999px; margin-bottom: 10px;
+    letter-spacing: 0.5px;
+  }
+  .login-box h1 { font-size: 20px; color: var(--primary-dark); margin-bottom: 4px; }
+  .login-box p { font-size: 13px; color: var(--muted); margin-bottom: 22px; }
+  .form-group { text-align: left; margin-bottom: 14px; }
+  .form-group label { display: block; font-size: 12px; font-weight: 600; color: var(--text); margin-bottom: 5px; }
+  .form-group select, .form-group input {
+    width: 100%; padding: 11px 12px; border: 1.5px solid var(--border); border-radius: 8px;
+    font-size: 14px; outline: none; transition: border-color 0.2s;
+  }
+  .form-group select:focus, .form-group input:focus { border-color: var(--primary); }
+  .btn-login {
+    width: 100%; padding: 12px; background: var(--primary); color: #fff; border: none;
+    border-radius: 8px; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 6px;
+    transition: background 0.2s;
+  }
+  .btn-login:hover { background: var(--primary-light); }
+  .login-error { color: var(--danger); font-size: 13px; margin-top: 10px; display: none; font-weight: 600; }
+  .login-contact {
+    margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--border);
+    font-size: 12px; color: var(--muted);
+  }
+
+  /* HEADER */
+  header {
+    background: linear-gradient(90deg, var(--primary-dark), var(--primary));
+    color: #fff; padding: 14px 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.12);
+    position: sticky; top: 0; z-index: 100;
+  }
+  .header-inner {
+    max-width: 1440px; margin: 0 auto; display: flex; flex-wrap: wrap;
+    align-items: center; justify-content: space-between; gap: 12px;
+  }
+  .brand h1 { font-size: 17px; font-weight: 800; letter-spacing: 0.3px; }
+  .brand span { font-size: 12px; opacity: 0.9; display: block; }
+  .user-bar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .role-pill {
+    background: rgba(255,255,255,0.18); padding: 5px 12px; border-radius: 999px;
+    font-size: 12px; font-weight: 600;
+  }
+  .btn-sm {
+    padding: 7px 12px; border-radius: 8px; border: none; font-size: 12px; font-weight: 600;
+    cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: 0.2s;
+  }
+  .btn-export { background: #fff; color: var(--primary-dark); }
+  .btn-export:hover { background: #e8f5e9; }
+  .btn-import { background: var(--accent); color: #fff; }
+  .btn-import:hover { background: #e65100; }
+  .btn-logout { background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.3); }
+  .btn-logout:hover { background: rgba(255,255,255,0.25); }
+
+  /* NAV TABS */
+  .nav-tabs {
+    background: #fff; border-bottom: 1px solid var(--border); padding: 0 20px;
+    overflow-x: auto; white-space: nowrap;
+  }
+  .nav-tabs-inner { max-width: 1440px; margin: 0 auto; display: flex; gap: 6px; }
+  .tab-btn {
+    padding: 13px 18px; border: none; background: none; font-size: 13.5px; font-weight: 600;
+    color: var(--muted); cursor: pointer; border-bottom: 3px solid transparent; transition: 0.2s;
+  }
+  .tab-btn:hover { color: var(--primary); }
+  .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
+
+  /* CONTAINER */
+  main { flex: 1; max-width: 1440px; width: 100%; margin: 0 auto; padding: 20px; }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* KPI CARDS */
+  .kpi-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 14px; margin-bottom: 22px;
+  }
+  .kpi-card {
+    background: var(--card); border-radius: var(--radius); padding: 16px 18px;
+    box-shadow: var(--shadow); border-left: 4px solid var(--primary);
+  }
+  .kpi-card.orange { border-left-color: var(--accent); }
+  .kpi-card.blue { border-left-color: var(--info); }
+  .kpi-card.red { border-left-color: var(--danger); }
+  .kpi-label { font-size: 11.5px; font-weight: 700; text-transform: uppercase; color: var(--muted); letter-spacing: 0.4px; }
+  .kpi-val { font-size: 21px; font-weight: 800; color: var(--text); margin-top: 4px; }
+  .kpi-sub { font-size: 12px; color: var(--muted); margin-top: 3px; }
+
+  /* FORMULAIRE EDC (2-COLUMN WORKSPACE) */
+  .workspace-grid {
+    display: grid; grid-template-columns: 380px 1fr; gap: 20px; align-items: start;
+  }
+  @media (max-width: 980px) { .workspace-grid { grid-template-columns: 1fr; } }
+
+  .card {
+    background: var(--card); border-radius: var(--radius); padding: 20px;
+    box-shadow: var(--shadow); border: 1px solid var(--border);
+  }
+  .card-title {
+    font-size: 15px; font-weight: 700; color: var(--primary-dark);
+    margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  }
+
+  /* STUDENT SELECTOR */
+  .search-input {
+    width: 100%; padding: 10px 12px; border: 1.5px solid var(--border); border-radius: 8px;
+    font-size: 14px; margin-bottom: 10px; outline: none;
+  }
+  .search-input:focus { border-color: var(--primary); }
+  .filter-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+  .filter-row select {
+    padding: 8px; border: 1px solid var(--border); border-radius: 8px; font-size: 12.5px; background: #fff;
+  }
+  .student-list {
+    max-height: 520px; overflow-y: auto; border: 1px solid var(--border); border-radius: 8px;
+  }
+  .student-item {
+    padding: 10px 12px; border-bottom: 1px solid #f1f5f9; cursor: pointer;
+    display: flex; justify-content: space-between; align-items: center; transition: 0.15s;
+  }
+  .student-item:hover { background: #f0fdf4; }
+  .student-item.selected { background: #dcfce7; border-left: 4px solid var(--primary); }
+  .st-name { font-weight: 700; font-size: 13px; color: var(--text); }
+  .st-meta { font-size: 11.5px; color: var(--muted); }
+  .st-badge {
+    font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 999px; white-space: nowrap;
+  }
+  .badge-ok { background: var(--success-bg); color: var(--success); }
+  .badge-partial { background: var(--warning-bg); color: var(--warning); }
+  .badge-unpaid { background: var(--danger-bg); color: var(--danger); }
+  .badge-bours { background: var(--info-bg); color: var(--info); }
+
+  /* FICHE ELEVE + SAISIE TRANCHES */
+  .fiche-header {
+    background: linear-gradient(135deg, #f0fdf4 0%, #e8f5e9 100%);
+    border: 1px solid #bbf7d0; border-radius: 10px; padding: 16px; margin-bottom: 18px;
+    display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px;
+  }
+  .fiche-id {
+    background: var(--primary); color: #fff; font-weight: 800; font-size: 14px;
+    padding: 6px 12px; border-radius: 8px;
+  }
+  .info-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px; margin-bottom: 18px;
+  }
+  .info-box {
+    background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 9px 12px;
+  }
+  .info-box .lbl { font-size: 11px; color: var(--muted); font-weight: 600; text-transform: uppercase; }
+  .info-box .val { font-size: 14px; font-weight: 700; color: var(--text); margin-top: 2px; }
+  .info-box.readonly { background: #f1f5f9; border-style: dashed; }
+
+  /* TRANCHES INPUT GRID */
+  .tranches-section {
+    background: #fffbeb; border: 1.5px solid #fde68a; border-radius: 10px; padding: 16px; margin-bottom: 18px;
+  }
+  .tranches-title {
+    font-size: 13.5px; font-weight: 800; color: #92400e; margin-bottom: 12px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .tranches-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;
+  }
+  .tranche-field label {
+    display: block; font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 5px;
+  }
+  .tranche-field input {
+    width: 100%; padding: 10px 12px; border: 2px solid #f59e0b; border-radius: 8px;
+    font-size: 15px; font-weight: 700; background: #fff; color: var(--primary-dark);
+    outline: none; transition: 0.2s;
+  }
+  .tranche-field input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(27,94,32,0.15); }
+  .tranche-field input:disabled {
+    background: #e2e8f0; border-color: #cbd5e1; color: #64748b; cursor: not-allowed;
+  }
+  .tranche-actions {
+    display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; align-items: center; justify-content: space-between;
+  }
+  .btn-save {
+    background: var(--primary); color: #fff; border: none; padding: 11px 22px;
+    border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; transition: 0.2s;
+  }
+  .btn-save:hover { background: var(--primary-light); }
+  .btn-save:disabled { background: #94a3b8; cursor: not-allowed; }
+  .btn-receipt {
+    background: #0f172a; color: #fff; border: none; padding: 10px 16px;
+    border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;
+  }
+  .btn-receipt:hover { background: #334155; }
+
+  /* LIVE CALCULATION PANELS (ELEVE / CLASSE / ETABLISSEMENT) */
+  .calc-panels {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 14px;
+  }
+  .calc-box {
+    border: 1px solid var(--border); border-radius: 10px; padding: 14px; background: #fff;
+  }
+  .calc-box h4 {
+    font-size: 12.5px; font-weight: 800; text-transform: uppercase; color: var(--primary);
+    margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid var(--border);
+  }
+  .calc-row {
+    display: flex; justify-content: space-between; font-size: 13px; padding: 4px 0;
+  }
+  .calc-row span:first-child { color: var(--muted); }
+  .calc-row span:last-child { font-weight: 700; }
+  .progress-wrap {
+    margin-top: 8px; background: #e2e8f0; border-radius: 999px; height: 9px; overflow: hidden;
+  }
+  .progress-bar {
+    height: 100%; background: var(--primary); transition: width 0.3s ease;
+  }
+
+  /* DATA TABLES */
+  .table-controls {
+    display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; align-items: center;
+  }
+  .table-controls input, .table-controls select {
+    padding: 9px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; background: #fff;
+  }
+  .table-wrap {
+    overflow-x: auto; border: 1px solid var(--border); border-radius: 10px; background: #fff;
+  }
+  table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  th {
+    background: var(--primary-dark); color: #fff; text-align: left; padding: 10px 10px;
+    font-weight: 700; white-space: nowrap; position: sticky; top: 0;
+  }
+  td { padding: 8px 10px; border-bottom: 1px solid #f1f5f9; white-space: nowrap; }
+  tr:hover td { background: #f8fafc; }
+  .num { text-align: right; font-variant-numeric: tabular-nums; }
+  .bold { font-weight: 700; }
+
+  /* TOAST */
+  #toast {
+    position: fixed; bottom: 24px; right: 24px; z-index: 9999;
+    background: #0f172a; color: #fff; padding: 12px 18px; border-radius: 10px;
+    font-size: 13.5px; font-weight: 600; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    transform: translateY(100px); opacity: 0; transition: all 0.3s ease;
+  }
+  #toast.show { transform: translateY(0); opacity: 1; }
+
+  /* FOOTER */
+  footer {
+    background: #fff; border-top: 1px solid var(--border); text-align: center;
+    padding: 14px 20px; font-size: 12.5px; color: var(--muted); margin-top: 30px;
+  }
+  footer strong { color: var(--primary-dark); }
+
+  /* PRINT RECEIPT */
+  @media print {
+    body * { visibility: hidden; }
+    #printArea, #printArea * { visibility: visible; }
+    #printArea {
+      position: fixed; inset: 0; background: #fff; padding: 30px; z-index: 99999;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- ÉCRAN DE CONNEXION PAR PROFIL -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-badge">LTA ADJA-OUÈRÈ • 2026</div>
+    <h1>Plateforme EDC — État de Droit Constaté</h1>
+    <p>Gestion des droits de scolarité, impayés 2025 et recouvrement par tranches</p>
+    <div class="form-group">
+      <label for="loginRole">Profil utilisateur</label>
+      <select id="loginRole">
+        <option value="comptable">Comptable / Économe (Saisie des tranches & Édition)</option>
+        <option value="proviseur">Proviseur / Directeur (Supervision & Export)</option>
+        <option value="censeur">Censeur (Consultation par classe & Élèves)</option>
+        <option value="surveillant">Surveillant Général (Contrôle de solvabilité)</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="loginPass">Code d'accès</label>
+      <input type="password" id="loginPass" placeholder="Entrez votre mot de passe" onkeypress="if(event.key==='Enter') doLogin()">
+    </div>
+    <button class="btn-login" onclick="doLogin()">Accéder à la plateforme</button>
+    <div id="loginError" class="login-error">Code d'accès incorrect. Veuillez contacter l'administrateur.</div>
+    <div class="login-contact">
+      Assistance technique & attribution des accès :<br>
+      <strong>Conçu par Parfait AKANRO - 0196322089</strong>
+    </div>
+  </div>
+</div>
+
+<!-- EN-TÊTE -->
+<header>
+  <div class="header-inner">
+    <div class="brand">
+      <h1>LYCÉE TECHNIQUE AGRICOLE D'ADJA-OUÈRÈ (LTAO)</h1>
+      <span>État de Droit Constaté (EDC) — Année Scolaire 2025-2026</span>
+    </div>
+    <div class="user-bar">
+      <span id="currentRoleBadge" class="role-pill">Profil : Comptable</span>
+      <button class="btn-sm btn-export" onclick="exportExcel()">📥 Exporter Excel (.xlsx)</button>
+      <label class="btn-sm btn-import" style="cursor:pointer;">
+        📤 Importer Excel
+        <input type="file" id="importFile" accept=".xlsx,.xls" style="display:none" onchange="importExcel(event)">
+      </label>
+      <button class="btn-sm btn-logout" onclick="logout()">Déconnexion</button>
+    </div>
+  </div>
+</header>
+
+<!-- ONGLETS DE NAVIGATION -->
+<nav class="nav-tabs">
+  <div class="nav-tabs-inner">
+    <button class="tab-btn active" onclick="switchTab('tabFormulaire', this)">📝 Formulaire EDC & Saisie Tranches</button>
+    <button class="tab-btn" onclick="switchTab('tabClasses', this)">🏫 Synthèse par Classe (34)</button>
+    <button class="tab-btn" onclick="switchTab('tabBase', this)">📊 Base Complète EDC (1 017 Élèves)</button>
+    <button class="tab-btn" onclick="switchTab('tabJournal', this)">🧾 Journal des Opérations</button>
+  </div>
+</nav>
+
+<main>
+  <!-- INDICATEURS GLOBAUX ÉTABLISSEMENT (COLONNES AA à AE) -->
+  <section class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-label">Effectif Établissement</div>
+      <div class="kpi-val" id="kpiEffectif">1 017</div>
+      <div class="kpi-sub" id="kpiRepartitionStatut">Boursiers & ITP</div>
+    </div>
+    <div class="kpi-card blue">
+      <div class="kpi-label">Total Scolarité Éts (TOTAL_SCOL_ETS)</div>
+      <div class="kpi-val" id="kpiTotalScol">0 FCFA</div>
+      <div class="kpi-sub" id="kpiDetailScol">Impayés 2025 + Scolarité 2026</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Total Payé Éts (TOTAL_PAYE_ETS)</div>
+      <div class="kpi-val" id="kpiTotalPaye" style="color:var(--success)">0 FCFA</div>
+      <div class="kpi-sub" id="kpiTranchesDetail">T1 + T2 + T3 + T4</div>
+    </div>
+    <div class="kpi-card red">
+      <div class="kpi-label">Total Impayé Éts (TOTAL_IMPAYE_ETS)</div>
+      <div class="kpi-val" id="kpiTotalReste" style="color:var(--danger)">0 FCFA</div>
+      <div class="kpi-sub">Reste à recouvrer</div>
+    </div>
+    <div class="kpi-card orange">
+      <div class="kpi-label">Taux Recouvrement (TR_ETS %)</div>
+      <div class="kpi-val" id="kpiTauxEts">0,00 %</div>
+      <div class="kpi-sub" id="kpiSoldesCount">0 élève soldé</div>
+    </div>
+  </section>
+
+  <!-- ONGLET 1 : FORMULAIRE EDC & VERSEMENT DES TRANCHES -->
+  <section id="tabFormulaire" class="tab-panel active">
+    <div class="workspace-grid">
+      <!-- COLONNE GAUCHE : RECHERCHE & LISTE DES ÉLÈVES -->
+      <div class="card">
+        <div class="card-title">
+          <span>🔍 Sélectionner un élève</span>
+          <span id="filteredCount" style="font-size:12px; color:var(--muted);">1 017</span>
+        </div>
+        <input type="text" id="searchStudent" class="search-input" placeholder="N° Global (ex: 766), Nom ou Prénoms..." oninput="renderStudentList()">
+        <div class="filter-row">
+          <select id="filterClassForm" onchange="renderStudentList()">
+            <option value="">Toutes les classes</option>
+          </select>
+          <select id="filterStatusPay" onchange="renderStudentList()">
+            <option value="">Tous états de paiement</option>
+            <option value="unpaid">Reste à payer (&gt; 0)</option>
+            <option value="paid">Soldé (0 FCFA)</option>
+            <option value="partial">Paiement partiel</option>
+            <option value="impaye2025">Avec impayé 2025</option>
+          </select>
+        </div>
+        <div id="studentList" class="student-list"></div>
+      </div>
+
+      <!-- COLONNE DROITE : FICHE INDIVIDUELLE & SAISIE DES 4 TRANCHES -->
+      <div class="card">
+        <div class="card-title">
+          <span>📋 Fiche État de Droit Constaté (Liaison directe BASE EDC)</span>
+          <div style="display:flex; gap:6px;">
+            <button class="btn-sm" style="background:#f1f5f9;" onclick="navStudent(-1)">◀ Précédent</button>
+            <button class="btn-sm" style="background:#f1f5f9;" onclick="navStudent(1)">Suivant ▶</button>
+          </div>
+        </div>
+
+        <div class="fiche-header">
+          <div>
+            <div style="font-size:12px; color:var(--primary); font-weight:700;">IDENTITÉ DE L'ÉLÈVE</div>
+            <div id="fFullName" style="font-size:19px; font-weight:800; color:var(--primary-dark);">—</div>
+            <div id="fSubMeta" style="font-size:13px; color:var(--muted);">—</div>
+          </div>
+          <div style="text-align:right;">
+            <div class="fiche-id" id="fNumGlobal">N° Global : —</div>
+            <div id="fNumClasse" style="font-size:12px; color:var(--muted); margin-top:4px;">N°/Classe : —</div>
+          </div>
+        </div>
+
+        <!-- DONNÉES SIGNALÉTIQUES & DROITS CONSTATÉS (VERROUILLÉS EN LECTURE SEULE) -->
+        <div class="info-grid">
+          <div class="info-box readonly">
+            <div class="lbl">Classe (Effectif)</div>
+            <div class="val" id="fClasse">—</div>
+          </div>
+          <div class="info-box readonly">
+            <div class="lbl">Niveau / Sexe</div>
+            <div class="val" id="fNiveauSexe">—</div>
+          </div>
+          <div class="info-box readonly">
+            <div class="lbl">Statut</div>
+            <div class="val" id="fStatut">—</div>
+          </div>
+          <div class="info-box readonly">
+            <div class="lbl">Impayé 2025</div>
+            <div class="val" id="fImpaye2025">0 FCFA</div>
+          </div>
+          <div class="info-box readonly">
+            <div class="lbl">Scolarité 2026</div>
+            <div class="val" id="fScolarite2026">0 FCFA</div>
+          </div>
+          <div class="info-box readonly" style="background:#e0f2fe; border-color:#7dd3fc;">
+            <div class="lbl" style="color:#0369a1;">Global à Payer</div>
+            <div class="val" id="fGlobalPayer" style="color:#0c4a6e;">0 FCFA</div>
+          </div>
+        </div>
+
+        <!-- SEULS CHAMPS DE SAISIE AUTORISÉS : VERSEMENT DES 4 TRANCHES -->
+        <div class="tranches-section">
+          <div class="tranches-title">
+            <span>💳 SAISIE DES VERSEMENTS PAR TRANCHE DE SCOLARITÉ (FCFA)</span>
+            <span id="roleLockHint" style="font-size:11.5px; font-weight:600;">Mode Édition Actif</span>
+          </div>
+          <div class="tranches-grid">
+            <div class="tranche-field">
+              <label for="inputT1">1ère TRANCHE (FCFA)</label>
+              <input type="number" id="inputT1" min="0" step="500" placeholder="0" oninput="previewStudentCalc()">
+            </div>
+            <div class="tranche-field">
+              <label for="inputT2">2ème TRANCHE (FCFA)</label>
+              <input type="number" id="inputT2" min="0" step="500" placeholder="0" oninput="previewStudentCalc()">
+            </div>
+            <div class="tranche-field">
+              <label for="inputT3">3ème TRANCHE (FCFA)</label>
+              <input type="number" id="inputT3" min="0" step="500" placeholder="0" oninput="previewStudentCalc()">
+            </div>
+            <div class="tranche-field">
+              <label for="inputT4">4ème TRANCHE (FCFA)</label>
+              <input type="number" id="inputT4" min="0" step="500" placeholder="0" oninput="previewStudentCalc()">
+            </div>
+          </div>
+          <div id="overpayWarning" style="display:none; color:var(--danger); font-size:12.5px; font-weight:700; margin-top:10px;">
+            ⚠️ Attention : Le total des tranches saisies dépasse le montant Global à Payer de cet élève !
+          </div>
+          <div class="tranche-actions">
+            <div style="font-size:12px; color:#78350f;">
+              Seuls ces 4 champs sont modifiables. Les totaux élève, classe et établissement se recalculent automatiquement.
+            </div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <button type="button" class="btn-receipt" onclick="printReceipt()">🖨️ Imprimer Reçu</button>
+              <button type="button" id="btnSaveTranches" class="btn-save" onclick="saveTranches()">💾 Enregistrer les versements</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- RÉPERCUSSIONS EN TEMPS RÉEL (FORMULES EXCEL REPRODUITES) -->
+        <div class="calc-panels">
+          <!-- SITUATION ÉLÈVE -->
+          <div class="calc-box">
+            <h4>👤 Situation Financière Élève</h4>
+            <div class="calc-row"><span>Global à Payer :</span><span id="cEleveGlobal">0 FCFA</span></div>
+            <div class="calc-row"><span>TOTAL_PAYE (T1..T4) :</span><span id="cElevePaye" style="color:var(--success);">0 FCFA</span></div>
+            <div class="calc-row"><span>RESTE_A_PAYER :</span><span id="cEleveReste" style="color:var(--danger);">0 FCFA</span></div>
+            <div class="calc-row"><span>État :</span><span id="cEleveStatutPay">—</span></div>
+            <div class="progress-wrap"><div id="pEleve" class="progress-bar" style="width:0%"></div></div>
+          </div>
+
+          <!-- SITUATION CLASSE -->
+          <div class="calc-box">
+            <h4 id="cClasseTitle">🏫 Situation de la Classe</h4>
+            <div class="calc-row"><span>TOTAL_SCOLAR_CLAS :</span><span id="cClasseGlobal">0 FCFA</span></div>
+            <div class="calc-row"><span>Total 1ère Tranche :</span><span id="cClasseT1">0 FCFA</span></div>
+            <div class="calc-row"><span>Total 2ème Tranche :</span><span id="cClasseT2">0 FCFA</span></div>
+            <div class="calc-row"><span>Total 3ème Tranche :</span><span id="cClasseT3">0 FCFA</span></div>
+            <div class="calc-row"><span>Total 4ème Tranche :</span><span id="cClasseT4">0 FCFA</span></div>
+            <div class="calc-row"><span>TOTAL_PAYE_CLASSE :</span><span id="cClassePaye" style="color:var(--success);">0 FCFA</span></div>
+            <div class="calc-row"><span>REST_A_PAYER_CLASSE :</span><span id="cClasseReste" style="color:var(--danger);">0 FCFA</span></div>
+            <div class="calc-row"><span>TR_CLASSE % :</span><span id="cClasseTaux">0,00 %</span></div>
+            <div class="progress-wrap"><div id="pClasse" class="progress-bar" style="width:0%"></div></div>
+          </div>
+
+          <!-- SITUATION ÉTABLISSEMENT -->
+          <div class="calc-box">
+            <h4>🏛️ Situation Établissement (LTAO)</h4>
+            <div class="calc-row"><span>Effectif Total :</span><span id="cEtsEff">1 017 élèves</span></div>
+            <div class="calc-row"><span>TOTAL_SCOL_ETS :</span><span id="cEtsGlobal">0 FCFA</span></div>
+            <div class="calc-row"><span>TOTAL_PAYE_ETS :</span><span id="cEtsPaye" style="color:var(--success);">0 FCFA</span></div>
+            <div class="calc-row"><span>TOTAL_IMPAYE_ETS :</span><span id="cEtsReste" style="color:var(--danger);">0 FCFA</span></div>
+            <div class="calc-row"><span>TR_ETS % :</span><span id="cEtsTaux">0,00 %</span></div>
+            <div class="progress-wrap"><div id="pEts" class="progress-bar" style="width:0%"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ONGLET 2 : SYNTHÈSE PAR CLASSE -->
+  <section id="tabClasses" class="tab-panel">
+    <div class="card">
+      <div class="card-title">
+        <span>🏫 Tableau Récapitulatif par Classe (Agrégations dynamiques BASE EDC)</span>
+        <span style="font-size:12px; color:var(--muted);">Cliquez sur une classe pour filtrer ses élèves</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Classe / Groupe</th>
+              <th class="num">Effectif</th>
+              <th class="num">Impayés 2025</th>
+              <th class="num">Scolarité 2026</th>
+              <th class="num">TOTAL_SCOLAR_CLAS</th>
+              <th class="num">1ère Tranche</th>
+              <th class="num">2ème Tranche</th>
+              <th class="num">3ème Tranche</th>
+              <th class="num">4ème Tranche</th>
+              <th class="num">TOTAL_PAYE_CLASSE</th>
+              <th class="num">REST_A_PAYER_CLASSE</th>
+              <th class="num">TR_CLASSE %</th>
+            </tr>
+          </thead>
+          <tbody id="classesTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ONGLET 3 : BASE COMPLÈTE EDC -->
+  <section id="tabBase" class="tab-panel">
+    <div class="card">
+      <div class="card-title">
+        <span>📊 Base de Données EDC (1 017 Élèves — Édition rapide des tranches)</span>
+        <span id="baseTableInfo" style="font-size:12px; color:var(--muted);"></span>
+      </div>
+      <div class="table-controls">
+        <input type="text" id="baseSearch" placeholder="Rechercher N°, Nom, Prénoms..." oninput="renderBaseTable()">
+        <select id="baseClassFilter" onchange="renderBaseTable()">
+          <option value="">Toutes les classes</option>
+        </select>
+        <select id="baseStatutFilter" onchange="renderBaseTable()">
+          <option value="">Tous statuts</option>
+          <option value="Bours">Boursier (Bours)</option>
+          <option value="ITP/Ext">ITP/Ext</option>
+          <option value="ITP/Int">ITP/Int</option>
+        </select>
+        <select id="basePayFilter" onchange="renderBaseTable()">
+          <option value="">Tous paiements</option>
+          <option value="unpaid">Avec reste à payer</option>
+          <option value="paid">Soldé</option>
+        </select>
+      </div>
+      <div class="table-wrap" style="max-height:620px;">
+        <table>
+          <thead>
+            <tr>
+              <th>N°</th>
+              <th>N°/Cl</th>
+              <th>Nom & Prénoms</th>
+              <th>Classe</th>
+              <th>Sexe</th>
+              <th>Statut</th>
+              <th class="num">Impayé 2025</th>
+              <th class="num">Scol. 2026</th>
+              <th class="num">Global à Payer</th>
+              <th class="num">1ère Tr.</th>
+              <th class="num">2ème Tr.</th>
+              <th class="num">3ème Tr.</th>
+              <th class="num">4ème Tr.</th>
+              <th class="num">Total Payé</th>
+              <th class="num">Reste à Payer</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="baseTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ONGLET 4 : JOURNAL DES OPÉRATIONS -->
+  <section id="tabJournal" class="tab-panel">
+    <div class="card">
+      <div class="card-title">
+        <span>🧾 Historique des Modifications de Versements</span>
+        <button class="btn-sm" style="background:#fee2e2; color:#b91c1c;" onclick="clearJournal()">Vider l'historique</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Date & Heure</th>
+              <th>Opérateur</th>
+              <th>N° Global</th>
+              <th>Élève</th>
+              <th>Classe</th>
+              <th>Détail des Tranches (FCFA)</th>
+              <th class="num">Nouveau Total Payé</th>
+              <th class="num">Reste à Payer</th>
+            </tr>
+          </thead>
+          <tbody id="journalTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- ZONE D'IMPRESSION REÇU -->
+<div id="printArea" style="display:none;"></div>
+
+<!-- NOTIFICATION TOAST -->
+<div id="toast"></div>
+
+<!-- PIED DE PAGE -->
+<footer>
+  <strong>Conçu par Parfait AKANRO - 0196322089</strong> • Plateforme de Gestion de l'État de Droit Constaté (EDC 2026) — Lycée Technique Agricole d'Adja-Ouèrè
+</footer>
+
+<script>
+// BASE DE DONNÉES INITIALE EXTRAITE DE AKR_LTA-AO_EDC__2026_CORRIGE_2.xlsx (1 017 élèves dans le fichier téléchargé)
+const INITIAL_STUDENTS = [
+  {"id":1,"numClasse":1,"nom":"ADRAMA","prenoms":"Amir ß1","classe":"TC2","classeGroupe":"TC2","niveau":"1","sexe":"M","statut":"ITP/Ext","effectifClasse":44,"impaye2025":10000,"scolarite2026":120000,"t1":0,"t2":0,"t3":0,"t4":0,"rowIdx":2}
+  /* ... 1 016 autres élèves inclus dans Plateforme_EDC_LTAO_2026.html ... */
+];
+
+const STORAGE_KEY = 'ltao_edc_2026_students_v1';
+const JOURNAL_KEY = 'ltao_edc_2026_journal_v1';
+
+const ROLE_CONFIG = {
+  comptable: { label: 'Comptable / Économe', pass: 'comptable2026', canEdit: true },
+  proviseur: { label: 'Proviseur / Directeur', pass: 'proviseur2026', canEdit: true },
+  censeur:   { label: 'Censeur', pass: 'censeur2026', canEdit: false },
+  surveillant:{ label: 'Surveillant Général', pass: 'surveillant2026', canEdit: false }
+};
+
+let currentRole = null;
+let students = [];
+let journal = [];
+let selectedStudentId = 766;
+
+function initData() {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (saved) {
+    try {
+      students = JSON.parse(saved);
+    } catch (e) {
+      students = JSON.parse(JSON.stringify(INITIAL_STUDENTS));
+    }
+  } else {
+    students = JSON.parse(JSON.stringify(INITIAL_STUDENTS));
+  }
+
+  const savedJournal = localStorage.getItem(JOURNAL_KEY);
+  if (savedJournal) {
+    try { journal = JSON.parse(savedJournal); } catch (e) { journal = []; }
+  }
+
+  populateClassFilters();
+  updateGlobalKPIs();
+  renderStudentList();
+  selectStudent(selectedStudentId);
+  renderClassesTable();
+  renderBaseTable();
+  renderJournalTable();
+}
+
+function saveData() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(students));
+}
+
+function saveJournal() {
+  localStorage.setItem(JOURNAL_KEY, JSON.stringify(journal));
+}
+
+function doLogin() {
+  const role = document.getElementById('loginRole').value;
+  const pass = document.getElementById('loginPass').value.trim();
+  const cfg = ROLE_CONFIG[role];
+  if (cfg && pass === cfg.pass) {
+    currentRole = role;
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('loginError').style.display = 'none';
+    document.getElementById('currentRoleBadge').textContent = 'Profil : ' + cfg.label;
+    applyRolePermissions();
+    showToast('Bienvenue, ' + cfg.label);
+  } else {
+    document.getElementById('loginError').style.display = 'block';
+  }
+}
+
+function logout() {
+  currentRole = null;
+  document.getElementById('loginPass').value = '';
+  document.getElementById('loginScreen').style.display = 'flex';
+}
+
+function applyRolePermissions() {
+  const canEdit = currentRole && ROLE_CONFIG[currentRole].canEdit;
+  ['inputT1', 'inputT2', 'inputT3', 'inputT4'].forEach(id => {
+    document.getElementById(id).disabled = !canEdit;
+  });
+  document.getElementById('btnSaveTranches').disabled = !canEdit;
+  document.getElementById('roleLockHint').textContent = canEdit
+    ? '✅ Saisie des tranches autorisée'
+    : '🔒 Lecture seule (Consultation uniquement)';
+}
+
+function fmtFCFA(n) {
+  return Math.round(n || 0).toLocaleString('fr-FR') + ' FCFA';
+}
+function fmtNum(n) {
+  return Math.round(n || 0).toLocaleString('fr-FR');
+}
+function fmtPct(n) {
+  return (isFinite(n) ? n : 0).toFixed(2).replace('.', ',') + ' %';
+}
+
+function getStudentMetrics(s, overrideTranches = null) {
+  const t1 = overrideTranches ? overrideTranches.t1 : (s.t1 || 0);
+  const t2 = overrideTranches ? overrideTranches.t2 : (s.t2 || 0);
+  const t3 = overrideTranches ? overrideTranches.t3 : (s.t3 || 0);
+  const t4 = overrideTranches ? overrideTranches.t4 : (s.t4 || 0);
+  const globalPayer = (s.impaye2025 || 0) + (s.scolarite2026 || 0);
+  const totalPaye = t1 + t2 + t3 + t4;
+  const restePayer = globalPayer - totalPaye;
+  return { t1, t2, t3, t4, globalPayer, totalPaye, restePayer };
+}
+
+function getClassMetrics(classeGroupe, previewStudent = null, previewTranches = null) {
+  const list = students.filter(st => st.classeGroupe === classeGroupe);
+  let impaye2025 = 0, scolarite2026 = 0, globalPayer = 0;
+  let t1 = 0, t2 = 0, t3 = 0, t4 = 0, totalPaye = 0, restePayer = 0;
+
+  list.forEach(st => {
+    const m = (previewStudent && st.id === previewStudent.id)
+      ? getStudentMetrics(st, previewTranches)
+      : getStudentMetrics(st);
+    impaye2025 += st.impaye2025 || 0;
+    scolarite2026 += st.scolarite2026 || 0;
+    globalPayer += m.globalPayer;
+    t1 += m.t1; t2 += m.t2; t3 += m.t3; t4 += m.t4;
+    totalPaye += m.totalPaye;
+    restePayer += m.restePayer;
+  });
+
+  const taux = globalPayer > 0 ? (totalPaye / globalPayer) * 100 : 100;
+  return {
+    effectif: list.length,
+    impaye2025, scolarite2026, globalPayer,
+    t1, t2, t3, t4, totalPaye, restePayer, taux
+  };
+}
+
+function getEtsMetrics(previewStudent = null, previewTranches = null) {
+  let impaye2025 = 0, scolarite2026 = 0, globalPayer = 0;
+  let t1 = 0, t2 = 0, t3 = 0, t4 = 0, totalPaye = 0, restePayer = 0;
+  let soldes = 0, boursiers = 0;
+
+  students.forEach(st => {
+    const m = (previewStudent && st.id === previewStudent.id)
+      ? getStudentMetrics(st, previewTranches)
+      : getStudentMetrics(st);
+    impaye2025 += st.impaye2025 || 0;
+    scolarite2026 += st.scolarite2026 || 0;
+    globalPayer += m.globalPayer;
+    t1 += m.t1; t2 += m.t2; t3 += m.t3; t4 += m.t4;
+    totalPaye += m.totalPaye;
+    restePayer += m.restePayer;
+    if (m.restePayer <= 0) soldes++;
+    if (st.statut === 'Bours') boursiers++;
+  });
+
+  const taux = globalPayer > 0 ? (totalPaye / globalPayer) * 100 : 0;
+  return {
+    effectif: students.length,
+    impaye2025, scolarite2026, globalPayer,
+    t1, t2, t3, t4, totalPaye, restePayer, taux, soldes, boursiers
+  };
+}
+
+function updateGlobalKPIs() {
+  const ets = getEtsMetrics();
+  document.getElementById('kpiEffectif').textContent = fmtNum(ets.effectif) + ' élèves';
+  document.getElementById('kpiRepartitionStatut').textContent = `${ets.boursiers} Boursiers • ${ets.effectif - ets.boursiers} ITP`;
+  document.getElementById('kpiTotalScol').textContent = fmtFCFA(ets.globalPayer);
+  document.getElementById('kpiDetailScol').textContent = `Impayés 2025: ${fmtNum(ets.impaye2025)} | Scol. 2026: ${fmtNum(ets.scolarite2026)}`;
+  document.getElementById('kpiTotalPaye').textContent = fmtFCFA(ets.totalPaye);
+  document.getElementById('kpiTranchesDetail').textContent = `T1: ${fmtNum(ets.t1)} | T2: ${fmtNum(ets.t2)} | T3: ${fmtNum(ets.t3)} | T4: ${fmtNum(ets.t4)}`;
+  document.getElementById('kpiTotalReste').textContent = fmtFCFA(ets.restePayer);
+  document.getElementById('kpiTauxEts').textContent = fmtPct(ets.taux);
+  document.getElementById('kpiSoldesCount').textContent = `${ets.soldes} / ${ets.effectif} élèves soldés`;
+}
+
+function populateClassFilters() {
+  const groups = [...new Set(students.map(s => s.classeGroupe))];
+  const selForm = document.getElementById('filterClassForm');
+  const selBase = document.getElementById('baseClassFilter');
+  selForm.innerHTML = '<option value="">Toutes les classes (34)</option>';
+  selBase.innerHTML = '<option value="">Toutes les classes (34)</option>';
+  groups.forEach(g => {
+    const count = students.filter(s => s.classeGroupe === g).length;
+    selForm.innerHTML += `<option value="${g}">${g} (${count})</option>`;
+    selBase.innerHTML += `<option value="${g}">${g} (${count})</option>`;
+  });
+}
+
+function renderStudentList() {
+  const q = document.getElementById('searchStudent').value.trim().toLowerCase();
+  const cl = document.getElementById('filterClassForm').value;
+  const payFilter = document.getElementById('filterStatusPay').value;
+
+  const filtered = students.filter(s => {
+    const m = getStudentMetrics(s);
+    if (cl && s.classeGroupe !== cl) return false;
+    if (payFilter === 'unpaid' && m.restePayer <= 0) return false;
+    if (payFilter === 'paid' && m.restePayer > 0) return false;
+    if (payFilter === 'partial' && !(m.totalPaye > 0 && m.restePayer > 0)) return false;
+    if (payFilter === 'impaye2025' && (s.impaye2025 || 0) <= 0) return false;
+    if (q) {
+      const hay = `${s.id} ${s.nom} ${s.prenoms} ${s.classe}`.toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+
+  document.getElementById('filteredCount').textContent = `${filtered.length} élève(s)`;
+  const container = document.getElementById('studentList');
+  container.innerHTML = filtered.slice(0, 150).map(s => {
+    const m = getStudentMetrics(s);
+    let badge = '';
+    if (m.globalPayer === 0) badge = '<span class="st-badge badge-bours">Boursier (0)</span>';
+    else if (m.restePayer <= 0) badge = '<span class="st-badge badge-ok">Soldé</span>';
+    else if (m.totalPaye > 0) badge = `<span class="st-badge badge-partial">Reste ${fmtNum(m.restePayer)}</span>`;
+    else badge = `<span class="st-badge badge-unpaid">Dû ${fmtNum(m.restePayer)}</span>`;
+
+    return `
+      <div class="student-item ${s.id === selectedStudentId ? 'selected' : ''}" onclick="selectStudent(${s.id})">
+        <div>
+          <div class="st-name">#${s.id} — ${s.nom} ${s.prenoms}</div>
+          <div class="st-meta">${s.classeGroupe} • ${s.statut} • Global: ${fmtNum(m.globalPayer)} F</div>
+        </div>
+        ${badge}
+      </div>
+    `;
+  }).join('');
+
+  if (filtered.length > 150) {
+    container.innerHTML += `<div style="padding:10px; text-align:center; font-size:12px; color:var(--muted);">Affichage limité aux 150 premiers résultats. Affinez votre recherche ou filtrez par classe.</div>`;
+  }
+}
+
+function selectStudent(id) {
+  const s = students.find(st => st.id === id);
+  if (!s) return;
+  selectedStudentId = id;
+
+  document.getElementById('fFullName').textContent = `${s.nom} ${s.prenoms}`;
+  document.getElementById('fSubMeta').textContent = `Classe : ${s.classeGroupe} | Statut : ${s.statut}`;
+  document.getElementById('fNumGlobal').textContent = `N° Global : ${s.id}`;
+  document.getElementById('fNumClasse').textContent = `N° / Classe : ${s.numClasse} sur ${s.effectifClasse}`;
+
+  document.getElementById('fClasse').textContent = `${s.classeGroupe} (${s.effectifClasse} él.)`;
+  document.getElementById('fNiveauSexe').textContent = `Niveau ${s.niveau || '—'} • Sexe : ${s.sexe}`;
+  document.getElementById('fStatut').textContent = s.statut;
+  document.getElementById('fImpaye2025').textContent = fmtFCFA(s.impaye2025);
+  document.getElementById('fScolarite2026').textContent = fmtFCFA(s.scolarite2026);
+  document.getElementById('fGlobalPayer').textContent = fmtFCFA((s.impaye2025 || 0) + (s.scolarite2026 || 0));
+
+  document.getElementById('inputT1').value = s.t1 || '';
+  document.getElementById('inputT2').value = s.t2 || '';
+  document.getElementById('inputT3').value = s.t3 || '';
+  document.getElementById('inputT4').value = s.t4 || '';
+
+  previewStudentCalc();
+  renderStudentList();
+}
+
+function navStudent(delta) {
+  const idx = students.findIndex(s => s.id === selectedStudentId);
+  if (idx === -1) return;
+  const nextIdx = (idx + delta + students.length) % students.length;
+  selectStudent(students[nextIdx].id);
+}
+
+function previewStudentCalc() {
+  const s = students.find(st => st.id === selectedStudentId);
+  if (!s) return;
+
+  const t1 = Math.max(0, Number(document.getElementById('inputT1').value) || 0);
+  const t2 = Math.max(0, Number(document.getElementById('inputT2').value) || 0);
+  const t3 = Math.max(0, Number(document.getElementById('inputT3').value) || 0);
+  const t4 = Math.max(0, Number(document.getElementById('inputT4').value) || 0);
+  const tranches = { t1, t2, t3, t4 };
+
+  const m = getStudentMetrics(s, tranches);
+  const cl = getClassMetrics(s.classeGroupe, s, tranches);
+  const ets = getEtsMetrics(s, tranches);
+
+  const warn = document.getElementById('overpayWarning');
+  warn.style.display = m.restePayer < 0 ? 'block' : 'none';
+
+  document.getElementById('cEleveGlobal').textContent = fmtFCFA(m.globalPayer);
+  document.getElementById('cElevePaye').textContent = fmtFCFA(m.totalPaye);
+  document.getElementById('cEleveReste').textContent = fmtFCFA(m.restePayer);
+  const pctEleve = m.globalPayer > 0 ? Math.min(100, (m.totalPaye / m.globalPayer) * 100) : 100;
+  document.getElementById('pEleve').style.width = pctEleve + '%';
+  document.getElementById('cEleveStatutPay').textContent =
+    m.globalPayer === 0 ? 'Boursier exonéré' : (m.restePayer <= 0 ? '✅ Soldé' : `En cours (${pctEleve.toFixed(0)}%)`);
+
+  document.getElementById('cClasseTitle').textContent = `🏫 Situation Classe : ${s.classeGroupe}`;
+  document.getElementById('cClasseGlobal').textContent = fmtFCFA(cl.globalPayer);
+  document.getElementById('cClasseT1').textContent = fmtFCFA(cl.t1);
+  document.getElementById('cClasseT2').textContent = fmtFCFA(cl.t2);
+  document.getElementById('cClasseT3').textContent = fmtFCFA(cl.t3);
+  document.getElementById('cClasseT4').textContent = fmtFCFA(cl.t4);
+  document.getElementById('cClassePaye').textContent = fmtFCFA(cl.totalPaye);
+  document.getElementById('cClasseReste').textContent = fmtFCFA(cl.restePayer);
+  document.getElementById('cClasseTaux').textContent = fmtPct(cl.taux);
+  document.getElementById('pClasse').style.width = Math.min(100, cl.taux) + '%';
+
+  document.getElementById('cEtsEff').textContent = `${ets.effectif} élèves`;
+  document.getElementById('cEtsGlobal').textContent = fmtFCFA(ets.globalPayer);
+  document.getElementById('cEtsPaye').textContent = fmtFCFA(ets.totalPaye);
+  document.getElementById('cEtsReste').textContent = fmtFCFA(ets.restePayer);
+  document.getElementById('cEtsTaux').textContent = fmtPct(ets.taux);
+  document.getElementById('pEts').style.width = Math.min(100, ets.taux) + '%';
+}
+
+function saveTranches() {
+  if (!currentRole || !ROLE_CONFIG[currentRole].canEdit) {
+    showToast('Action non autorisée pour votre profil.');
+    return;
+  }
+  const s = students.find(st => st.id === selectedStudentId);
+  if (!s) return;
+
+  const t1 = Math.max(0, Number(document.getElementById('inputT1').value) || 0);
+  const t2 = Math.max(0, Number(document.getElementById('inputT2').value) || 0);
+  const t3 = Math.max(0, Number(document.getElementById('inputT3').value) || 0);
+  const t4 = Math.max(0, Number(document.getElementById('inputT4').value) || 0);
+
+  s.t1 = t1;
+  s.t2 = t2;
+  s.t3 = t3;
+  s.t4 = t4;
+
+  const m = getStudentMetrics(s);
+
+  journal.unshift({
+    date: new Date().toLocaleString('fr-FR'),
+    role: ROLE_CONFIG[currentRole].label,
+    id: s.id,
+    eleve: `${s.nom} ${s.prenoms}`,
+    classe: s.classeGroupe,
+    detail: `T1: ${fmtNum(t1)} | T2: ${fmtNum(t2)} | T3: ${fmtNum(t3)} | T4: ${fmtNum(t4)}`,
+    totalPaye: m.totalPaye,
+    restePayer: m.restePayer
+  });
+
+  saveData();
+  saveJournal();
+  updateGlobalKPIs();
+  renderStudentList();
+  renderClassesTable();
+  renderBaseTable();
+  renderJournalTable();
+  showToast(`✅ Versements enregistrés pour ${s.nom} ${s.prenoms}`);
+}
+
+function renderClassesTable() {
+  const groups = [...new Set(students.map(s => s.classeGroupe))];
+  const tbody = document.getElementById('classesTableBody');
+  let totEff = 0, totImp = 0, totScol = 0, totGlob = 0, totT1 = 0, totT2 = 0, totT3 = 0, totT4 = 0, totPaye = 0, totReste = 0;
+
+  tbody.innerHTML = groups.map(g => {
+    const c = getClassMetrics(g);
+    totEff += c.effectif; totImp += c.impaye2025; totScol += c.scolarite2026;
+    totGlob += c.globalPayer; totT1 += c.t1; totT2 += c.t2; totT3 += c.t3; totT4 += c.t4;
+    totPaye += c.totalPaye; totReste += c.restePayer;
+
+    return `
+      <tr style="cursor:pointer;" onclick="openClassInBase('${g}')">
+        <td class="bold">${g}</td>
+        <td class="num">${c.effectif}</td>
+        <td class="num">${fmtNum(c.impaye2025)}</td>
+        <td class="num">${fmtNum(c.scolarite2026)}</td>
+        <td class="num bold">${fmtNum(c.globalPayer)}</td>
+        <td class="num">${fmtNum(c.t1)}</td>
+        <td class="num">${fmtNum(c.t2)}</td>
+        <td class="num">${fmtNum(c.t3)}</td>
+        <td class="num">${fmtNum(c.t4)}</td>
+        <td class="num bold" style="color:var(--success);">${fmtNum(c.totalPaye)}</td>
+        <td class="num bold" style="color:var(--danger);">${fmtNum(c.restePayer)}</td>
+        <td class="num bold">${fmtPct(c.taux)}</td>
+      </tr>
+    `;
+  }).join('');
+
+  const etsTaux = totGlob > 0 ? (totPaye / totGlob) * 100 : 0;
+  tbody.innerHTML += `
+    <tr style="background:#e8f5e9; font-weight:800;">
+      <td>TOTAL ÉTABLISSEMENT (LTAO)</td>
+      <td class="num">${totEff}</td>
+      <td class="num">${fmtNum(totImp)}</td>
+      <td class="num">${fmtNum(totScol)}</td>
+      <td class="num">${fmtNum(totGlob)}</td>
+      <td class="num">${fmtNum(totT1)}</td>
+      <td class="num">${fmtNum(totT2)}</td>
+      <td class="num">${fmtNum(totT3)}</td>
+      <td class="num">${fmtNum(totT4)}</td>
+      <td class="num" style="color:var(--success);">${fmtNum(totPaye)}</td>
+      <td class="num" style="color:var(--danger);">${fmtNum(totReste)}</td>
+      <td class="num">${fmtPct(etsTaux)}</td>
+    </tr>
+  `;
+}
+
+function openClassInBase(classeGroupe) {
+  document.getElementById('filterClassForm').value = classeGroupe;
+  renderStudentList();
+  const first = students.find(s => s.classeGroupe === classeGroupe);
+  if (first) selectStudent(first.id);
+  switchTab('tabFormulaire', document.querySelector('.tab-btn'));
+}
+
+function renderBaseTable() {
+  const q = document.getElementById('baseSearch').value.trim().toLowerCase();
+  const cl = document.getElementById('baseClassFilter').value;
+  const stFilter = document.getElementById('baseStatutFilter').value;
+  const payFilter = document.getElementById('basePayFilter').value;
+
+  const filtered = students.filter(s => {
+    const m = getStudentMetrics(s);
+    if (cl && s.classeGroupe !== cl) return false;
+    if (stFilter && s.statut !== stFilter) return false;
+    if (payFilter === 'unpaid' && m.restePayer <= 0) return false;
+    if (payFilter === 'paid' && m.restePayer > 0) return false;
+    if (q) {
+      const hay = `${s.id} ${s.nom} ${s.prenoms} ${s.classe}`.toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+
+  document.getElementById('baseTableInfo').textContent = `${filtered.length} élève(s) affiché(s)`;
+  const tbody = document.getElementById('baseTableBody');
+  tbody.innerHTML = filtered.slice(0, 250).map(s => {
+    const m = getStudentMetrics(s);
+    return `
+      <tr>
+        <td class="bold">${s.id}</td>
+        <td>${s.numClasse}</td>
+        <td class="bold">${s.nom} ${s.prenoms}</td>
+        <td>${s.classeGroupe}</td>
+        <td>${s.sexe}</td>
+        <td>${s.statut}</td>
+        <td class="num">${fmtNum(s.impaye2025)}</td>
+        <td class="num">${fmtNum(s.scolarite2026)}</td>
+        <td class="num bold">${fmtNum(m.globalPayer)}</td>
+        <td class="num">${fmtNum(m.t1)}</td>
+        <td class="num">${fmtNum(m.t2)}</td>
+        <td class="num">${fmtNum(m.t3)}</td>
+        <td class="num">${fmtNum(m.t4)}</td>
+        <td class="num bold" style="color:var(--success);">${fmtNum(m.totalPaye)}</td>
+        <td class="num bold" style="color:var(--danger);">${fmtNum(m.restePayer)}</td>
+        <td>
+          <button class="btn-sm" style="background:#dcfce7; color:#15803d;" onclick="editFromTable(${s.id})">Saisir</button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function editFromTable(id) {
+  selectStudent(id);
+  switchTab('tabFormulaire', document.querySelector('.tab-btn'));
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function renderJournalTable() {
+  const tbody = document.getElementById('journalTableBody');
+  if (journal.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:20px; color:var(--muted);">Aucune modification enregistrée dans cette session.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = journal.map(j => `
+    <tr>
+      <td>${j.date}</td>
+      <td>${j.role}</td>
+      <td class="bold">#${j.id}</td>
+      <td class="bold">${j.eleve}</td>
+      <td>${j.classe}</td>
+      <td>${j.detail}</td>
+      <td class="num bold" style="color:var(--success);">${fmtFCFA(j.totalPaye)}</td>
+      <td class="num bold" style="color:var(--danger);">${fmtFCFA(j.restePayer)}</td>
+    </tr>
+  `).join('');
+}
+
+function clearJournal() {
+  if (!confirm('Voulez-vous effacer le journal des opérations ?')) return;
+  journal = [];
+  saveJournal();
+  renderJournalTable();
+}
+
+function printReceipt() {
+  const s = students.find(st => st.id === selectedStudentId);
+  if (!s) return;
+  const m = getStudentMetrics(s);
+  const now = new Date().toLocaleString('fr-FR');
+  const printDiv = document.getElementById('printArea');
+  printDiv.style.display = 'block';
+  printDiv.innerHTML = `
+    <div style="max-width:650px; margin:0 auto; border:2px solid #1b5e20; padding:24px; font-family:Arial,sans-serif;">
+      <div style="text-align:center; border-bottom:2px solid #1b5e20; padding-bottom:12px; margin-bottom:16px;">
+        <div style="font-size:13px; font-weight:bold;">RÉPUBLIQUE DU BÉNIN — MINISTÈRE DE L'ENSEIGNEMENT SECONDAIRE</div>
+        <h2 style="margin:6px 0; color:#1b5e20;">LYCÉE TECHNIQUE AGRICOLE D'ADJA-OUÈRÈ</h2>
+        <div style="font-size:14px; font-weight:bold;">REÇU DE VERSEMENT SCOLARITÉ — ÉTAT DE DROIT CONSTATÉ 2026</div>
+      </div>
+      <table style="width:100%; margin-bottom:16px; font-size:13px;">
+        <tr><td><strong>N° Global :</strong> ${s.id}</td><td><strong>Classe :</strong> ${s.classeGroupe} (N° ${s.numClasse})</td></tr>
+        <tr><td><strong>Nom & Prénoms :</strong> ${s.nom} ${s.prenoms}</td><td><strong>Statut :</strong> ${s.statut}</td></tr>
+        <tr><td><strong>Date d'édition :</strong> ${now}</td><td><strong>Opérateur :</strong> ${currentRole ? ROLE_CONFIG[currentRole].label : 'Comptabilité'}</td></tr>
+      </table>
+      <table style="width:100%; border-collapse:collapse; font-size:13px; margin-bottom:16px;" border="1" cellpadding="7">
+        <tr style="background:#f0fdf4;"><th>Rubrique</th><th style="text-align:right;">Montant (FCFA)</th></tr>
+        <tr><td>Impayé Année 2025</td><td style="text-align:right;">${fmtNum(s.impaye2025)}</td></tr>
+        <tr><td>Scolarité 2026</td><td style="text-align:right;">${fmtNum(s.scolarite2026)}</td></tr>
+        <tr><td><strong>GLOBAL À PAYER</strong></td><td style="text-align:right;"><strong>${fmtNum(m.globalPayer)}</strong></td></tr>
+        <tr><td>1ère Tranche versée</td><td style="text-align:right;">${fmtNum(m.t1)}</td></tr>
+        <tr><td>2ème Tranche versée</td><td style="text-align:right;">${fmtNum(m.t2)}</td></tr>
+        <tr><td>3ème Tranche versée</td><td style="text-align:right;">${fmtNum(m.t3)}</td></tr>
+        <tr><td>4ème Tranche versée</td><td style="text-align:right;">${fmtNum(m.t4)}</td></tr>
+        <tr style="background:#dcfce7;"><td><strong>TOTAL PAYÉ</strong></td><td style="text-align:right;"><strong>${fmtNum(m.totalPaye)}</strong></td></tr>
+        <tr style="background:#fee2e2;"><td><strong>RESTE À PAYER</strong></td><td style="text-align:right;"><strong>${fmtNum(m.restePayer)}</strong></td></tr>
+      </table>
+      <div style="display:flex; justify-content:space-between; margin-top:30px; font-size:12px;">
+        <div>Signature de l'Élève / Parent</div>
+        <div>Cachet et Signature du Comptable</div>
+      </div>
+      <div style="text-align:center; font-size:10px; color:#64748b; margin-top:24px; border-top:1px solid #ddd; padding-top:8px;">
+        Conçu par Parfait AKANRO - 0196322089
+      </div>
+    </div>
+  `;
+  window.print();
+  printDiv.style.display = 'none';
+}
+
+function exportExcel() {
+  const wb = XLSX.utils.book_new();
+  const ets = getEtsMetrics();
+
+  const header = [
+    'N° GLOBAL', 'N °/ CLASSE', 'NOM', 'PRENOMS', 'CLASSE', 'NIVEAU', 'SEXE', 'STATUT',
+    'EFFECTIF CLASSE', 'IMPAYE 2025', 'SCOLARITE 2026', 'GLOBAL A PAYER',
+    '1ère  TRANCHE', '2ème  TRANCHE', '3ème  TRANCHE', '4ème  TRANCHE',
+    'TOTAL_PAYE', 'RESTE_A_PAYER',
+    'TOTAL_SCOLAR_CLAS', 'TOTAL 1ère TRANCHE CLASSE', 'TOTAL 2ème TRANCHE CLASS',
+    'TOTAL 3ème TRANCHE CLASS', 'TOTAL 4ème TRANCHE CLASS',
+    'TOTAL_PAYE_CLASSE', 'REST_A_PAYER_CLASSE', 'TR_CLASSE %',
+    'TOTAL_SCOL_ETS', 'TOTAL_PAYE_ETS', 'TR_ETS %', 'EFFECTIF_ETABLISSEMENT', 'TOTAL_IMPAYE_ETS'
+  ];
+
+  const rows = [header];
+  students.forEach(s => {
+    const m = getStudentMetrics(s);
+    const cl = getClassMetrics(s.classeGroupe);
+    rows.push([
+      s.id, s.numClasse, s.nom, s.prenoms, s.classe, s.niveau, s.sexe, s.statut,
+      s.effectifClasse, s.impaye2025, s.scolarite2026, m.globalPayer,
+      m.t1 || null, m.t2 || null, m.t3 || null, m.t4 || null,
+      m.totalPaye, m.restePayer,
+      cl.globalPayer, cl.t1, cl.t2, cl.t3, cl.t4,
+      cl.totalPaye, cl.restePayer, Number(cl.taux.toFixed(2)),
+      ets.globalPayer, ets.totalPaye, Number(ets.taux.toFixed(2)), ets.effectif, ets.restePayer
+    ]);
+  });
+
+  const wsBase = XLSX.utils.aoa_to_sheet(rows);
+  XLSX.utils.book_append_sheet(wb, wsBase, 'BASE EDC');
+
+  const classHeader = [
+    'CLASSE', 'EFFECTIF', 'IMPAYE 2025', 'SCOLARITE 2026', 'TOTAL_SCOLAR_CLAS',
+    '1ère TRANCHE', '2ème TRANCHE', '3ème TRANCHE', '4ème TRANCHE',
+    'TOTAL_PAYE_CLASSE', 'REST_A_PAYER_CLASSE', 'TR_CLASSE %'
+  ];
+  const classRows = [classHeader];
+  [...new Set(students.map(s => s.classeGroupe))].forEach(g => {
+    const c = getClassMetrics(g);
+    classRows.push([
+      g, c.effectif, c.impaye2025, c.scolarite2026, c.globalPayer,
+      c.t1, c.t2, c.t3, c.t4, c.totalPaye, c.restePayer, Number(c.taux.toFixed(2))
+    ]);
+  });
+  const wsClass = XLSX.utils.aoa_to_sheet(classRows);
+  XLSX.utils.book_append_sheet(wb, wsClass, 'SYNTHESE CLASSES');
+
+  XLSX.writeFile(wb, `EDC_LTAO_2026_MIS_A_JOUR_${new Date().toISOString().slice(0,10)}.xlsx`);
+  showToast('📥 Fichier Excel exporté avec succès !');
+}
+
+function importExcel(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const wb = XLSX.read(new Uint8Array(e.target.result), { type: 'array' });
+      const ws = wb.Sheets['BASE EDC'] || wb.Sheets[wb.SheetNames[0]];
+      const data = XLSX.utils.sheet_to_json(ws, { header: 1 });
+      let updated = 0;
+      for (let i = 1; i < data.length; i++) {
+        const row = data[i];
+        const id = Number(row[0]);
+        if (!id) continue;
+        const st = students.find(s => s.id === id);
+        if (st) {
+          st.t1 = Number(row[12]) || 0;
+          st.t2 = Number(row[13]) || 0;
+          st.t3 = Number(row[14]) || 0;
+          st.t4 = Number(row[15]) || 0;
+          updated++;
+        }
+      }
+      saveData();
+      updateGlobalKPIs();
+      renderStudentList();
+      selectStudent(selectedStudentId);
+      renderClassesTable();
+      renderBaseTable();
+      showToast(`✅ ${updated} dossiers synchronisés depuis le fichier Excel !`);
+    } catch (err) {
+      alert('Erreur lors de la lecture du fichier Excel : ' + err.message);
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function switchTab(tabId, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(tabId).classList.add('active');
+  if (btn) btn.classList.add('active');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3200);
+}
+
+window.addEventListener('DOMContentLoaded', initData);
+</script>
+</body>
+</html>
